@@ -57,7 +57,7 @@ class Node:
         next: The reference to the next node in the linked list (None by default).
     """
 
-    def __init__(self, data, next=None):
+    def __init__(self, data, next_node=None):
         """
         Initializes a new node with the given data and a reference to the next node.
 
@@ -66,11 +66,13 @@ class Node:
             next: Optional; the next node in the linked list (None by default).
         """
         self.data = data
-        self.next = next
+        self.next_node = next_node
 
 
 class StackError(Exception):
-    pass
+    """
+    Custom exception to be raised for errors related to stack operations.
+    """
 
 
 class Stack:
@@ -111,7 +113,7 @@ class Stack:
             item: The data to push onto the stack.
         """
         new_node = Node(item)
-        new_node.next = self._top
+        new_node.next_node = self._top
         self._top = new_node
         self._size += 1
 
@@ -152,7 +154,9 @@ class Stack:
 
 
 class QueueError(Exception):
-    pass
+    """
+    Custom exception to be raised for errors related to queue operations.
+    """
 
 
 class Queue:
@@ -349,26 +353,28 @@ class ImageGraph:
         print("Starting BFS; initial state:")
         self.print_image()
 
-         # Initialize
+        # Initialize the queue and set the color for the start vertex
         queue = [start_index]
         self.vertices[start_index].visit_and_set_color(color)
 
         # Perform BFS traversal
         while queue:
             current_index = queue.pop(0)  # Dequeue an elem
-            current_vertex = self.vertices[current_index]
+            self.visit_neighbors_bfs(current_index, queue, color)
 
-            for neighbor_index in current_vertex.edges:
-                neighbor = self.vertices[neighbor_index]
-
-                # Skip if alr visited or if the color doesn't match
-                if neighbor.visited or neighbor.color != current_vertex.color:
-                    continue
-
-                # Mark the neighbor & set color
-                neighbor.visit_and_set_color(color)
-                queue.append(neighbor_index)  # Enqueue the neighbor
         self.print_image()
+
+    def visit_neighbors_bfs(self, current_index, queue, color):
+        """Helper method to visit neighbors during BFS."""
+        current_vertex = self.vertices[current_index]
+
+        for neighbor_index in current_vertex.edges:
+            neighbor = self.vertices[neighbor_index]
+
+            # Skip if already visited or if the color doesn't match
+            if not neighbor.visited and neighbor.color == current_vertex.color:
+                neighbor.visit_and_set_color(color)
+                queue.append(neighbor_index)
 
     # TO DO
     def dfs(self, start_index, color):
@@ -394,7 +400,6 @@ class ImageGraph:
         post: every vertex that matches the start index's color will be recolored
               to the given color
         """
-
         self.reset_visited()
         print("Starting DFS; initial state:")
         self.print_image()
@@ -402,23 +407,29 @@ class ImageGraph:
         # Initialize stack and visited set
         to_visit = [start_index]
         visited_nodes = {start_index}
-
         self.vertices[start_index].visit_and_set_color(color)
 
+        # Perform DFS traversal
         while to_visit:
             current_idx = to_visit.pop()
-            curr_vertex = self.vertices[current_idx]
-
-            for neighbor_idx in curr_vertex.edges:
-                # Check if the neighbor is not visited and has the same color
-                neighbor = self.vertices[neighbor_idx]
-                if neighbor_idx not in visited_nodes:
-                    if neighbor.color == curr_vertex.color:
-                        visited_nodes.add(neighbor_idx)
-                        neighbor.visit_and_set_color(color)
-                        to_visit.append(neighbor_idx)
+            self.visit_neighbors_dfs(current_idx, visited_nodes, to_visit, color)
 
         self.print_image()
+
+    def visit_neighbors_dfs(self, current_idx, visited_nodes, to_visit, color):
+        """Helper method to visit neighbors during DFS."""
+        curr_vertex = self.vertices[current_idx]
+
+        for neighbor_idx in curr_vertex.edges:
+            # Check if the neighbor is not visited and has the same color
+            neighbor = self.vertices[neighbor_idx]
+            if neighbor_idx not in visited_nodes:
+                if neighbor.color == curr_vertex.color:
+                    visited_nodes.add(neighbor_idx)
+                    neighbor.visit_and_set_color(color)
+                    to_visit.append(neighbor_idx)
+        self.print_image()
+
 
 # TO DO
 def create_graph(data):
@@ -485,7 +496,8 @@ def main():
 
     # print adjacency matrix in a readable format (maybe row by row)
     print("Adjacency Matrix:")
-    for row in img_graph.create_adjacency_matrix():
+    adj_matrix = img_graph.create_adjacency_matrix()
+    for row in adj_matrix:
         print(row)
 
     # run bfs
