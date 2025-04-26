@@ -199,12 +199,14 @@ class Queue:
             item: The data to put at the end of queue.
         """
         new_node = Node(item)
-        if self.is_empty():
+        if self._rear is None:
+            # empty
             self._front = new_node
+            self._rear = new_node
         else:
-            self._rear.next = new_node
-        self._rear = new_node
-        self._size += 1
+            self._rear.next_node = new_node
+            self._rear = new_node
+            self._size += 1
 
     def dequeue(self):
         """
@@ -395,25 +397,33 @@ class ImageGraph:
         post: every vertex that matches the start index's color will be recolored
               to the given color
         """
-        self.reset_visited()  # Clear all visited flags
+        self.reset_visited()
         print("Starting DFS; initial state:")
         self.print_image()
 
         to_visit = Stack()
         to_visit.push(start_index)
 
-        og_color = self.vertices[start_index].color  # Save OG color to match
-        self.vertices[start_index].visit_and_set_color(color)  # Color the start vertex
+        og_color = self.vertices[start_index].color
+        self.vertices[start_index].visit_and_set_color(color)
 
         while not to_visit.is_empty():
-            current = self.vertices[to_visit.pop()]
-            for neighbor_idx in current.edges:  # Check all neighbors
+            current_index = to_visit.peek() # check
+            current_vertex = self.vertices[current_index]
+
+            neighbors_visited = True
+
+            for neighbor_idx in current_vertex.edges:
                 neighbor = self.vertices[neighbor_idx]
-                # If neighbor matches original color and wasn't visited yet
                 if not neighbor.visited and neighbor.color == og_color:
                     neighbor.visit_and_set_color(color)
                     to_visit.push(neighbor_idx)
                     self.print_image()
+                    neighbors_visited = False
+                    break # don't go deeper
+
+            if neighbors_visited:
+                to_visit.pop() # now you're good
 
 # TO DO
 def create_graph(data):
