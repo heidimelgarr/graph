@@ -369,8 +369,6 @@ class ImageGraph:
                 if not neighbor_vertex.visited and neighbor_vertex.color == target_color:
                     neighbor_vertex.visit_and_set_color(color)
                     search_queue.enqueue(neighbor_index)
-                    self.print_image()
-        self.print_image()
 
 
     # TO DO
