@@ -354,21 +354,26 @@ class ImageGraph:
         self.reset_visited()
         print("Starting BFS; initial state:")
         self.print_image()
-
-        # Initialize
         search_queue = Queue()
         search_queue.enqueue(start_index)
 
         target_color = self.vertices[start_index].color
-        self.vertices[start_index].visit_and_set_color(color)
+
+        self.vertices[start_index].visited = True  # mark as visited
 
         while not search_queue.is_empty():
-            current_vertex = self.vertices[search_queue.dequeue()]
+            # dequeue
+            current_index = search_queue.dequeue()
+            current_vertex = self.vertices[current_index]
+
+            current_vertex.visit_and_set_color(color) # recolor
+
             for neighbor_index in current_vertex.edges:
                 neighbor_vertex = self.vertices[neighbor_index]
+                # if not visited
                 if not neighbor_vertex.visited and neighbor_vertex.color == target_color:
-                    neighbor_vertex.visit_and_set_color(color)
                     search_queue.enqueue(neighbor_index)
+                    neighbor_vertex.visited = True
 
 
     # TO DO
