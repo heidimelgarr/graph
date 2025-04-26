@@ -130,7 +130,7 @@ class Stack:
         if self.is_empty():
             raise StackError("Pop from empty stack.")
         removed_data = self._top.data
-        self._top = self._top.next
+        self._top = self._top.next_node
         self._size -= 1
         return removed_data
 
@@ -219,7 +219,7 @@ class Queue:
         if self.is_empty():
             raise QueueError("Dequeue from empty queue.")
         front_data = self._front.data
-        self._front = self._front.next
+        self._front = self._front.next_node
         if self._front is None:  # If queue becomes empty
             self._rear = None
         self._size -= 1
