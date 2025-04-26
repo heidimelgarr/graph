@@ -427,35 +427,35 @@ def create_graph(data):
           and the search color.
     """
     lines = data.strip().split("\n")
-    graph_size = int(lines[0])
-    num_vertices = int(lines[1])
-
-    img_graph = ImageGraph(graph_size)
+    size = int(lines[0])
+    num_v = int(lines[1])
+    graph = ImageGraph(size)
 
     # Create vertices
-    for i in range(2, 2 + num_vertices):
-        parts = lines[i].split(", ")  # split a vertex
-        x = int(parts[0])
-        y = int(parts[1])
-        color = parts[2].strip()
-        vertex = ColoredVertex(i - 2, x, y, color)
-        img_graph.vertices.append(vertex)
+    for i in range(2, 2 + num_v):
+        v_info = lines[i].strip().split(",")
+        graph.vertices.append(ColoredVertex(
+            i - 2,
+            int(v_info[0]),  # x
+            int(v_info[1]),  # y
+            v_info[2].strip()  # color
+        ))
 
     # Create edges
-    num_edges = int(lines[2 + num_vertices])
-    for i in range(3 + num_vertices, 3 + num_vertices + num_edges):
-        parts = lines[i].split(", ")  # split an edge
-        from_idx = int(parts[0])
-        to_idx = int(parts[1])
-        img_graph.vertices[from_idx].add_edge(to_idx)
-        img_graph.vertices[to_idx].add_edge(from_idx)
+    num_e = int(lines[2 + num_v])
+    for i in range(3 + num_v, 3 + num_v + num_e):
+        e_info = lines[i].strip().split(",")
+        u = int(e_info[0])
+        v = int(e_info[1])
+        graph.vertices[u].add_edge(v)
+        graph.vertices[v].add_edge(u)
 
-    # Starting index and color
-    start_info = lines[3 + num_vertices + num_edges].split(", ")
-    start_index = int(start_info[0])
-    search_color = start_info[1].strip()
+    # Start index and search color
+    start = lines[3 + num_v + num_e].strip().split(",")
+    start_idx = int(start[0])
+    search_color = start[1].strip()
 
-    return img_graph, start_index, search_color
+    return graph, start_idx, search_color
 
 
 # TO DO
