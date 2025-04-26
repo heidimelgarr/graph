@@ -1,7 +1,7 @@
 """
 Student information for this assignment:
 
-Replace <FULL NAME> with your name.
+
 On my/our honor, Heidi Melgar, this
 programming assignment is my own work and I have not provided this code to
 any other student.
@@ -330,7 +330,7 @@ class ImageGraph:
         """
         You must implement this algorithm using a Queue.
 
-        Performs a Breadth-First Search (DFS) starting from a given vertex, changing
+        Performs a Breadth-First Search (BFS) starting from a given vertex, changing
         all vertices that are adjacent and share the same color as the starting
         vertex's color to the given color. Think of how an image bucket fill will
         only change all same colored pixels that are in contact with each other.
@@ -344,7 +344,7 @@ class ImageGraph:
 
         pre: start_index is a valid integer representing the index of the starting
              vertex in the vertices instance variable.
-             color: The color to change vertices to during the DFS traversal
+             color: The color to change vertices to during the BFS traversal
 
         post: every vertex that matches the start index's color will be recolored
               to the given color
@@ -353,28 +353,23 @@ class ImageGraph:
         print("Starting BFS; initial state:")
         self.print_image()
 
-        # Initialize the queue and set the color for the start vertex
-        queue = [start_index]
+        # Initialize
+        search_queue = Queue()
+        search_queue.enqueue(start_index)
+
+        target_color = self.vertices[start_index].color
         self.vertices[start_index].visit_and_set_color(color)
 
-        # Perform BFS traversal
-        while queue:
-            current_index = queue.pop(0)  # Dequeue an elem
-            self.visit_neighbors_bfs(current_index, queue, color)
-
+        while not search_queue.is_empty():
+            current_vertex = self.vertices[search_queue.dequeue()]
+            for neighbor_index in current_vertex.edges:
+                neighbor_vertex = self.vertices[neighbor_index]
+                if not neighbor_vertex.visited and neighbor_vertex.color == target_color:
+                    neighbor_vertex.visit_and_set_color(color)
+                    search_queue.enqueue(neighbor_index)
+                    self.print_image()
         self.print_image()
 
-    def visit_neighbors_bfs(self, current_index, queue, color):
-        """Helper method to visit neighbors during BFS."""
-        current_vertex = self.vertices[current_index]
-
-        for neighbor_index in current_vertex.edges:
-            neighbor = self.vertices[neighbor_index]
-
-            # Skip if already visited or if the color doesn't match
-            if not neighbor.visited and neighbor.color == current_vertex.color:
-                neighbor.visit_and_set_color(color)
-                queue.append(neighbor_index)
 
     # TO DO
     def dfs(self, start_index, color):
@@ -400,36 +395,25 @@ class ImageGraph:
         post: every vertex that matches the start index's color will be recolored
               to the given color
         """
-        self.reset_visited()
+        self.reset_visited()  # Clear all visited flags
         print("Starting DFS; initial state:")
         self.print_image()
 
-        # Initialize stack and visited set
-        to_visit = [start_index]
-        visited_nodes = {start_index}
-        self.vertices[start_index].visit_and_set_color(color)
+        to_visit = Stack()
+        to_visit.push(start_index)
 
-        # Perform DFS traversal
-        while to_visit:
-            current_idx = to_visit.pop()
-            self.visit_neighbors_dfs(current_idx, visited_nodes, to_visit, color)
+        og_color = self.vertices[start_index].color  # Save OG color to match
+        self.vertices[start_index].visit_and_set_color(color)  # Color the start vertex
 
-        self.print_image()
-
-    def visit_neighbors_dfs(self, current_idx, visited_nodes, to_visit, color):
-        """Helper method to visit neighbors during DFS."""
-        curr_vertex = self.vertices[current_idx]
-
-        for neighbor_idx in curr_vertex.edges:
-            # Check if the neighbor is not visited and has the same color
-            neighbor = self.vertices[neighbor_idx]
-            if neighbor_idx not in visited_nodes:
-                if neighbor.color == curr_vertex.color:
-                    visited_nodes.add(neighbor_idx)
+        while not to_visit.is_empty():
+            current = self.vertices[to_visit.pop()]
+            for neighbor_idx in current.edges:  # Check all neighbors
+                neighbor = self.vertices[neighbor_idx]
+                # If neighbor matches original color and wasn't visited yet
+                if not neighbor.visited and neighbor.color == og_color:
                     neighbor.visit_and_set_color(color)
-                    to_visit.append(neighbor_idx)
-        self.print_image()
-
+                    to_visit.push(neighbor_idx)
+                    self.print_image()
 
 # TO DO
 def create_graph(data):
@@ -442,8 +426,8 @@ def create_graph(data):
     post: a tuple containing the ImageGraph instance, the starting position,
           and the search color.
     """
-     # Split the data by new line
-    lines = data.split("\n")
+    # Split the data by new line
+    lines = data.strip().split("\n")
 
     # Get size of image and number of vertices
     graph_size = int(lines[0])
@@ -453,12 +437,9 @@ def create_graph(data):
     img_graph = ImageGraph(graph_size)
 
     # Create vertices - vertex info has the format "x,y,color"
-    vertices = []
     for i in range(2, 2 + num_vertices):
-        line = lines[i]
-        x, y, color = line.split(", ")
+        x, y, color = lines[i].split(", ")
         vertex = ColoredVertex(i - 2, int(x), int(y), color.strip())
-        vertices.append(vertex)
         img_graph.vertices.append(vertex)
 
     # Create edges between vertices - edge info has the format "from_index,to_index"
@@ -466,15 +447,13 @@ def create_graph(data):
     num_edges = int(lines[2 + num_vertices])
     for i in range(3 + num_vertices, 3 + num_vertices + num_edges):
         from_idx, to_idx = lines[i].split(", ")
-        from_idx = int(from_idx)
-        to_idx = int(to_idx)
-        vertices[from_idx].add_edge(to_idx)
-        vertices[to_idx].add_edge(from_idx)
+        img_graph.vertices[from_idx].add_edge(to_idx)
+        img_graph.vertices[to_idx].add_edge(from_idx)
 
     # Read search starting position and color
     start_line = lines[3 + num_vertices + num_edges].split(", ")
     start_index = int(start_line[0])
-    search_color = start_line[1]
+    search_color = start_line[1].strip()
 
     return img_graph, start_index, search_color.strip()
 
