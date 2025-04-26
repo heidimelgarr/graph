@@ -434,21 +434,23 @@ def create_graph(data):
 
     # Create vertices
     for i in range(2, 2 + num_vertices):
-        for i in range(2, 2 + num_vertices):
-            v_info = lines[i].split(", ")
-            vertex = ColoredVertex(i - 2, int(v_info[0]), int(v_info[1]), v_info[2].strip())
-            img_graph.vertices.append(vertex)
+        parts = lines[i].split(", ")  # split a vertex
+        x = int(parts[0])
+        y = int(parts[1])
+        color = parts[2].strip()
+        vertex = ColoredVertex(i - 2, x, y, color)
+        img_graph.vertices.append(vertex)
 
     # Create edges
     num_edges = int(lines[2 + num_vertices])
     for i in range(3 + num_vertices, 3 + num_vertices + num_edges):
-        edge_info = lines[i].split(", ")
-        from_idx = int(edge_info[0])
-        to_idx = int(edge_info[1])
+        parts = lines[i].split(", ")  # split an edge
+        from_idx = int(parts[0])
+        to_idx = int(parts[1])
         img_graph.vertices[from_idx].add_edge(to_idx)
         img_graph.vertices[to_idx].add_edge(from_idx)
 
-    # Read start index and search color
+    # Starting index and color
     start_info = lines[3 + num_vertices + num_edges].split(", ")
     start_index = int(start_info[0])
     search_color = start_info[1].strip()
