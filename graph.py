@@ -354,27 +354,41 @@ class ImageGraph:
         self.reset_visited()
         print("Starting BFS; initial state:")
         self.print_image()
-        search_queue = Queue()
-        search_queue.enqueue(start_index)
+        # Create Queue
+        pending = Queue()
+        start_vertex = self.vertices[start_index]
+        og_color = start_vertex.color
 
-        target_color = self.vertices[start_index].color
+        # If same
+        if og_color == color:
+            return
 
-        self.vertices[start_index].visited = True  # mark as visited
+        # Start BFS
+        start_vertex.visited = True
+        pending.enqueue(start_index)
 
-        while not search_queue.is_empty():
-            # dequeue
-            current_index = search_queue.dequeue()
-            current_vertex = self.vertices[current_index]
+        while not pending.is_empty():
+            # Dequeue the next vertex to process
+            curr_idx = pending.dequeue()
+            curr_vertex = self.vertices[curr_idx]
 
-            current_vertex.visit_and_set_color(color) # recolor
+            # If matches: recolor it
+            if curr_vertex.color == og_color:
+                curr_vertex.visit_and_set_color(color)
 
-            for neighbor_index in current_vertex.edges:
-                neighbor_vertex = self.vertices[neighbor_index]
-                # if not visited
-                if not neighbor_vertex.visited and neighbor_vertex.color == target_color:
-                    search_queue.enqueue(neighbor_index)
-                    neighbor_vertex.visited = True
+            # Explore all vertices
+            for neighbor_idx in curr_vertex.edges:
+                neighbor = self.vertices[neighbor_idx]
 
+                # Skip alr visited neighbors
+                if neighbor.visited:
+                    continue
+
+                # If neighbor matches: enqueue
+                if neighbor.color == og_color:
+                    neighbor.visited = True
+                    pending.enqueue(neighbor_idx)
+        self.print_image()
 
     # TO DO
     def dfs(self, start_index, color):
