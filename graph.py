@@ -380,12 +380,7 @@ class ImageGraph:
             for neighbor_idx in curr_vertex.edges:
                 neighbor = self.vertices[neighbor_idx]
 
-                # Skip alr visited neighbors
-                if neighbor.visited:
-                    continue
-
-                # If neighbor matches: enqueue
-                if neighbor.color == og_color:
+                if neighbor.color == og_color and not neighbor.visited:
                     neighbor.visited = True
                     pending.enqueue(neighbor_idx)
         self.print_image()
